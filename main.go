@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ var days = []func(string){
 	day1,
 	day2,
 	day3,
-	nil,
+	day4,
 	day5,
 }
 
@@ -135,6 +136,50 @@ func day5(input string) {
 		}
 	}
 
+	fmt.Println("part 2:", sum2)
+}
+
+func day4(input string) {
+	lines := strings.Split(input, "\r\n")
+	repeats := make([]int, len(lines)+5)
+	sum1 := 0
+	sum2 := 0
+	for i, line := range lines {
+		repeats[i+1]++
+		points := 0
+		nums := strings.Split(strings.Split(line, ":")[1], "|")
+		winners := make([]int, 0, 10)
+		for _, v := range strings.Split(nums[0], " ") {
+			if v != "" {
+				winners = append(winners, quickconv(strings.Trim(v, " ")))
+			}
+		}
+		winCount := 0
+		for _, v := range strings.Split(nums[1], " ") {
+			if v != "" {
+				n := quickconv(strings.Trim(v, " "))
+				if slices.Contains(winners, n) {
+					winCount++
+					if points == 0 {
+						points = 1
+					} else {
+						points *= 2
+					}
+				}
+			}
+		}
+		sum1 += points
+		sum2 += repeats[i+1]
+		for j := 0; j < winCount; j++ {
+			index := i + j + 2
+			if index >= len(repeats) {
+				break
+			}
+			repeats[index] += repeats[i+1]
+		}
+	}
+
+	fmt.Println("part 1:", sum1)
 	fmt.Println("part 2:", sum2)
 }
 
