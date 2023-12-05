@@ -66,14 +66,10 @@ func day5() {
 	for i, v := range seedsStr {
 		seeds[i] = quickconv(v)
 	}
-
-	seedToSoil := readMap(cats[1])
-	soilToFert := readMap(cats[2])
-	fertToWater := readMap(cats[3])
-	waterToLight := readMap(cats[4])
-	lightToTemp := readMap(cats[5])
-	tempToHumid := readMap(cats[6])
-	humidToLoc := readMap(cats[7])
+	maps := [7][][3]int{}
+	for i := range maps {
+		maps[i] = readMap(cats[i+1])
+	}
 
 	findInMap := func(val int, xtoy [][3]int) (int, int) {
 		next := uint(0)
@@ -93,22 +89,17 @@ func day5() {
 	}
 
 	findLocation := func(seed int) (int, int) {
-		var soil, fert, water, light, temp, humid, location int
 		diffs := [7]int{}
-		soil, diffs[0] = findInMap(seed, seedToSoil)
-		fert, diffs[1] = findInMap(soil, soilToFert)
-		water, diffs[2] = findInMap(fert, fertToWater)
-		light, diffs[3] = findInMap(water, waterToLight)
-		temp, diffs[4] = findInMap(light, lightToTemp)
-		humid, diffs[5] = findInMap(temp, tempToHumid)
-		location, diffs[6] = findInMap(humid, humidToLoc)
+		for i, v := range maps {
+			seed, diffs[i] = findInMap(seed, v)
+		}
 		diff := -1
 		for _, v := range diffs {
 			if (v < diff || diff == -1) && v > 0 {
 				diff = v
 			}
 		}
-		return location, diff
+		return seed, diff
 	}
 
 	sum1 := uint(0)
