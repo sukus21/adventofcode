@@ -71,61 +71,68 @@ func day5() {
 	tempToHumid := readMap(cats[6])
 	humidToLoc := readMap(cats[7])
 
-	findInMap := func(val int, xtoy [][3]int) int {
+	findInMap := func(val int, xtoy [][3]int) (int, int) {
+		next := uint(0)
+		next -= 1
 		for _, v := range xtoy {
 			if val >= v[1] && val < v[1]+v[2] {
-				diff := val - v[1]
-				return v[0] + diff
+				diff := uint((v[1] + v[2]) - val)
+				return v[0] + (val - v[1]), int(diff)
+			} else if v[1] > val {
+				diff := uint(v[1] - val)
+				if diff < next {
+					next = diff
+				}
 			}
 		}
-		return val
+		return val, int(next)
+	}
+
+	findLocation := func(seed int) (int, int) {
+		var soil, fert, water, light, temp, humid, location int
+		diffs := [7]int{}
+		soil, diffs[0] = findInMap(seed, seedToSoil)
+		fert, diffs[1] = findInMap(soil, soilToFert)
+		water, diffs[2] = findInMap(fert, fertToWater)
+		light, diffs[3] = findInMap(water, waterToLight)
+		temp, diffs[4] = findInMap(light, lightToTemp)
+		humid, diffs[5] = findInMap(temp, tempToHumid)
+		location, diffs[6] = findInMap(humid, humidToLoc)
+		diff := -1
+		for _, v := range diffs {
+			if (v < diff || diff == -1) && v > 0 {
+				diff = v
+			}
+		}
+		return location, diff
 	}
 
 	sum1 := uint(0)
 	sum1 -= 1
 	for _, seed := range seeds {
-		soil := findInMap(seed, seedToSoil)
-		fert := findInMap(soil, soilToFert)
-		water := findInMap(fert, fertToWater)
-		light := findInMap(water, waterToLight)
-		temp := findInMap(light, lightToTemp)
-		humid := findInMap(temp, tempToHumid)
-		location := findInMap(humid, humidToLoc)
+		location, _ := findLocation(seed)
 		if uint(location) < sum1 {
 			sum1 = uint(location)
 		}
 	}
 	fmt.Println("part 1:", sum1)
 
-	sumChan := make(chan uint)
-	for i := 0; i < len(seeds); i += 2 {
-		go func(seedInit int, seedRange int) {
-			chanSum := uint(0)
-			chanSum -= 1
-			for seed := seedInit; seed < seedInit+seedRange; seed++ {
-				soil := findInMap(seed, seedToSoil)
-				fert := findInMap(soil, soilToFert)
-				water := findInMap(fert, fertToWater)
-				light := findInMap(water, waterToLight)
-				temp := findInMap(light, lightToTemp)
-				humid := findInMap(temp, tempToHumid)
-				location := findInMap(humid, humidToLoc)
-				if uint(location) < chanSum {
-					chanSum = uint(location)
-				}
-			}
-			sumChan <- chanSum
-		}(seeds[i], seeds[i+1])
-	}
-
 	sum2 := uint(0)
 	sum2 -= 1
-	for i := 0; i < len(seeds)/2; i++ {
-		newSum := int(<-sumChan)
-		if uint(newSum) < sum2 {
-			sum2 = uint(newSum)
+	for i := 0; i < len(seeds); i += 2 {
+		seedInit := seeds[i]
+		seedRange := seeds[i+1]
+		seedSkip := 0
+		for seed := seedInit; seed < seedInit+seedRange; seed += seedSkip {
+			var location int
+			location, seedSkip = findLocation(seed)
+			if uint(location) < sum2 {
+				sum2 = uint(location)
+			}
+			if seedSkip <= 0 {
+				break
+			}
 		}
-		fmt.Println("finished set", i+1, "/", len(seeds)/2)
 	}
 
 	fmt.Println("part 2:", sum2)
