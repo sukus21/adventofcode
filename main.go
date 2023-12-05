@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var days = []func(string){
+var days = []func(string) (int, int){
 	day1,
 	day2,
 	day3,
@@ -31,8 +31,8 @@ func main() {
 			os.Exit(1)
 		}
 		dayChosen = int(n)
-		if dayChosen >= len(days) {
-			fmt.Println("day not implemented yet")
+		if dayChosen > len(days) {
+			fmt.Printf("day %d not implemented yet\n", dayChosen)
 			os.Exit(1)
 		}
 	default:
@@ -50,12 +50,14 @@ func main() {
 
 	//Call day function
 	start := time.Now()
-	days[dayChosen-1](string(raw))
+	part1, part2 := days[dayChosen-1](string(raw))
 	end := time.Now()
+	fmt.Println("part 1:", part1)
+	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
 }
 
-func day5(input string) {
+func day5(input string) (int, int) {
 	cats := strings.Split(input, "\r\n\r\n")
 	readMap := func(str string) [][3]int {
 		lines := strings.Split(str, "\r\n")[1:]
@@ -116,7 +118,6 @@ func day5(input string) {
 			sum1 = uint(location)
 		}
 	}
-	fmt.Println("part 1:", sum1)
 
 	sum2 := uint(0)
 	sum2 -= 1
@@ -136,10 +137,10 @@ func day5(input string) {
 		}
 	}
 
-	fmt.Println("part 2:", sum2)
+	return int(sum1), int(sum2)
 }
 
-func day4(input string) {
+func day4(input string) (int, int) {
 	lines := strings.Split(input, "\r\n")
 	repeats := make([]int, len(lines)+5)
 	sum1 := 0
@@ -179,11 +180,10 @@ func day4(input string) {
 		}
 	}
 
-	fmt.Println("part 1:", sum1)
-	fmt.Println("part 2:", sum2)
+	return sum1, sum2
 }
 
-func day3(input string) {
+func day3(input string) (int, int) {
 	type Symbol struct {
 		val rune
 		row int
@@ -269,11 +269,10 @@ func day3(input string) {
 		}
 	}
 
-	fmt.Println("part 1:", sum1)
-	fmt.Println("part 2:", sum2)
+	return sum1, sum2
 }
 
-func day2(input string) {
+func day2(input string) (int, int) {
 	lines := strings.Split(input, "\r\n")
 	sum1 := 0
 	sum2 := 0
@@ -313,10 +312,10 @@ func day2(input string) {
 		}
 		sum2 += maxRed * maxGreen * maxBlue
 	}
-	fmt.Printf("Part 1: %d\nPart 2: %d\n", sum1, sum2)
+	return sum1, sum2
 }
 
-func day1(input string) {
+func day1(input string) (int, int) {
 	numLookup := []string{
 		"one",
 		"two",
@@ -369,7 +368,7 @@ func day1(input string) {
 		sum2 += int(num)
 	}
 
-	fmt.Printf("Part 1: %d\nPart 2: %d\n", sum1, sum2)
+	return sum1, sum2
 }
 
 func quickconv(str string) int {
