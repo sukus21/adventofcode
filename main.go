@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var days = []func(){
+var days = []func(string){
 	day1,
 	day2,
 	day3,
@@ -39,18 +39,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	//Read input file
+	fname := fmt.Sprintf("input/day%d.txt", dayChosen)
+	raw, err := os.ReadFile(fname)
+	if err != nil {
+		fmt.Println("could not open input file:", err)
+		os.Exit(1)
+	}
+
 	//Call day function
 	start := time.Now()
-	days[dayChosen-1]()
+	days[dayChosen-1](string(raw))
 	end := time.Now()
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
 }
 
-//go:embed day5.txt
-var inputDay5 string
-
-func day5() {
-	cats := strings.Split(inputDay5, "\r\n\r\n")
+func day5(input string) {
+	cats := strings.Split(input, "\r\n\r\n")
 	readMap := func(str string) [][3]int {
 		lines := strings.Split(str, "\r\n")[1:]
 		output := make([][3]int, len(lines))
@@ -133,10 +138,7 @@ func day5() {
 	fmt.Println("part 2:", sum2)
 }
 
-//go:embed day3.txt
-var inputDay3 string
-
-func day3() {
+func day3(input string) {
 	type Symbol struct {
 		val rune
 		row int
@@ -160,7 +162,7 @@ func day3() {
 		})
 	}
 
-	lines := strings.Split(inputDay3, "\r\n")
+	lines := strings.Split(input, "\r\n")
 	for i, line := range lines {
 		strBuf := ""
 		numStartCol := 0
@@ -226,11 +228,8 @@ func day3() {
 	fmt.Println("part 2:", sum2)
 }
 
-//go:embed day2.txt
-var inputDay2 string
-
-func day2() {
-	lines := strings.Split(inputDay2, "\r\n")
+func day2(input string) {
+	lines := strings.Split(input, "\r\n")
 	sum1 := 0
 	sum2 := 0
 	for i, line := range lines {
@@ -272,10 +271,7 @@ func day2() {
 	fmt.Printf("Part 1: %d\nPart 2: %d\n", sum1, sum2)
 }
 
-//go:embed day1.txt
-var inputDay1 string
-
-func day1() {
+func day1(input string) {
 	numLookup := []string{
 		"one",
 		"two",
@@ -288,7 +284,7 @@ func day1() {
 		"nine",
 	}
 
-	lines := strings.Split(inputDay1, "\n")
+	lines := strings.Split(input, "\n")
 	sum1 := 0
 	sum2 := 0
 	for _, v := range lines {
