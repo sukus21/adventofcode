@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var days = []func(){
@@ -39,7 +40,10 @@ func main() {
 	}
 
 	//Call day function
+	start := time.Now()
 	days[dayChosen-1]()
+	end := time.Now()
+	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
 }
 
 //go:embed day5.txt
