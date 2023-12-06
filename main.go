@@ -16,6 +16,7 @@ var days = []func(string) (int, int){
 	day3,
 	day4,
 	day5,
+	day6,
 }
 
 func main() {
@@ -55,6 +56,49 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day6(input string) (int, int) {
+	lines := strings.Split(input, "\r\n")
+	for i := range lines {
+		lines[i] = strings.Split(lines[i], ":")[1]
+	}
+	times := make([]int, 0)
+	distances := make([]int, 0)
+	for _, v := range strings.Split(lines[0], " ") {
+		if v != "" {
+			times = append(times, quickconv(v))
+		}
+	}
+	for _, v := range strings.Split(lines[1], " ") {
+		if v != "" {
+			distances = append(distances, quickconv(v))
+		}
+	}
+	sum1 := 1
+	for i, record := range distances {
+		recordBreaks := 0
+		timeLimit := times[i]
+		for time := 1; time < timeLimit; time++ {
+			distance := time * (timeLimit - time)
+			if distance > record {
+				recordBreaks++
+			}
+		}
+		sum1 *= recordBreaks
+	}
+
+	timeLimit := quickconv(strings.ReplaceAll(lines[0], " ", ""))
+	record := quickconv(strings.ReplaceAll(lines[1], " ", ""))
+	sum2 := 0
+	for time := 1; time < timeLimit; time++ {
+		distance := time * (timeLimit - time)
+		if distance > record {
+			sum2++
+		}
+	}
+
+	return sum1, sum2
 }
 
 func day5(input string) (int, int) {
