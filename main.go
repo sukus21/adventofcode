@@ -17,6 +17,7 @@ var days = []func(string) (int, int){
 	day4,
 	day5,
 	day6,
+	day7,
 }
 
 func main() {
@@ -56,6 +57,101 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day7(input string) (int, int) {
+	type Hand struct {
+		bet       int
+		strength1 int
+		strength2 int
+	}
+	labels := [2][]int{
+		{'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14},
+		{'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 01, 'Q': 12, 'K': 13, 'A': 14},
+	}
+
+	findKind := func(matches [16]int) int {
+		m3 := false
+		m2 := false
+		for _, v := range matches {
+			if v == 5 {
+				return 7
+			} else if v == 4 {
+				return 6
+			} else if v == 3 {
+				m3 = true
+			} else if v == 2 {
+				if m2 {
+					return 3
+				}
+				m2 = true
+			}
+		}
+		if m2 && m3 {
+			return 5
+		} else if m3 {
+			return 4
+		} else if m2 {
+			return 2
+		} else {
+			return 1
+		}
+	}
+
+	//Construct cards
+	lines := strings.Split(input, "\r\n")
+	hands := make([]*Hand, len(lines))
+	for i, line := range lines {
+		hands[i] = new(Hand)
+		matches := [16]int{}
+		parts := strings.Split(line, " ")
+		for j, char := range parts[0] {
+			matches[labels[0][char]]++
+			hands[i].strength1 += labels[0][char] << ((4 - j) * 4)
+			hands[i].strength2 += labels[1][char] << ((4 - j) * 4)
+		}
+		hands[i].bet = quickconv(parts[1])
+		hands[i].strength1 += findKind(matches) << 20
+		maxCards := 11
+		for i, v := range matches {
+			if (v >= matches[maxCards] && i != 11) || (maxCards == 11 && v > 0) {
+				maxCards = i
+			}
+		}
+		jokers := matches[11]
+		matches[11] = 0
+		matches[maxCards] += jokers
+		hands[i].strength2 += findKind(matches) << 20
+	}
+
+	//Sort cards
+	handNum := len(hands)
+	sort1 := make([]*Hand, handNum)
+	sort2 := make([]*Hand, handNum)
+	copy(sort1, hands)
+	copy(sort2, hands)
+	for i := 0; i < handNum-1; i++ {
+		for j := 0; j < handNum-1-i; j++ {
+			if sort1[j].strength1 < sort1[j+1].strength1 {
+				temp := sort1[j]
+				sort1[j] = sort1[j+1]
+				sort1[j+1] = temp
+			}
+			if sort2[j].strength2 < sort2[j+1].strength2 {
+				temp := sort2[j]
+				sort2[j] = sort2[j+1]
+				sort2[j+1] = temp
+			}
+		}
+	}
+	sum1 := 0
+	sum2 := 0
+	for i := range hands {
+		sum1 += (handNum - i) * sort1[i].bet
+		sum2 += (handNum - i) * sort2[i].bet
+	}
+
+	return sum1, sum2
 }
 
 func day6(input string) (int, int) {
