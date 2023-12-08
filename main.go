@@ -64,10 +64,16 @@ func day8(input string) (int, int) {
 	lines := strings.Split(input, "\r\n")
 	turns := []rune(lines[0])
 	paths := make(map[string][2]string)
+	nodes := make([]string, 0)
 	for _, v := range lines[2:] {
-		paths[v[0:3]] = [2]string{v[7:10], v[12:15]}
+		pathName := v[0:3]
+		paths[pathName] = [2]string{v[7:10], v[12:15]}
+		if pathName[2] == 'A' {
+			nodes = append(nodes, pathName)
+		}
 	}
 
+	//Find exit to path AAA
 	node := "AAA"
 	instruction := 0
 	sum1 := 0
@@ -77,7 +83,47 @@ func day8(input string) (int, int) {
 		instruction = (instruction + 1) % len(turns)
 	}
 
-	return sum1, 0
+	//Find iterations until things repeat (which they do, apparently???)
+	instruction = 0
+	iterations := 0
+	found := len(nodes)
+	repeats := make([]int, found)
+	for found != 0 {
+		iterations++
+		direction := ternary(turns[instruction] == 'R', 1, 0)
+		instruction = (instruction + 1) % len(turns)
+		for i, v := range nodes {
+			if repeats[i] != 0 {
+				continue
+			}
+			nodes[i] = paths[v][direction]
+			if nodes[i][2] == 'Z' {
+				found--
+				repeats[i] = iterations
+			}
+		}
+	}
+
+	//Find lowest common multiple of repeat iterations
+	//Modified version of this: https://siongui.github.io/2017/06/03/go-find-lcm-by-gcd/
+	var LCM func(v ...int) int
+	LCM = func(v ...int) int {
+		a := v[0]
+		b := v[1]
+		for b != 0 {
+			t := b
+			b = a % b
+			a = t
+		}
+		result := v[0] * v[1] / a
+		for i := 2; i < len(v); i++ {
+			result = LCM(result, v[i])
+		}
+		return result
+	}
+	sum2 := LCM(repeats...)
+
+	return sum1, sum2
 }
 
 func day7(input string) (int, int) {
