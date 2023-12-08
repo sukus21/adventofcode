@@ -18,6 +18,7 @@ var days = []func(string) (int, int){
 	day5,
 	day6,
 	day7,
+	day8,
 }
 
 func main() {
@@ -57,6 +58,26 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day8(input string) (int, int) {
+	lines := strings.Split(input, "\r\n")
+	turns := []rune(lines[0])
+	paths := make(map[string][2]string)
+	for _, v := range lines[2:] {
+		paths[v[0:3]] = [2]string{v[7:10], v[12:15]}
+	}
+
+	node := "AAA"
+	instruction := 0
+	sum1 := 0
+	for node != "ZZZ" {
+		sum1++
+		node = paths[node][ternary(turns[instruction] == 'R', 1, 0)]
+		instruction = (instruction + 1) % len(turns)
+	}
+
+	return sum1, 0
 }
 
 func day7(input string) (int, int) {
