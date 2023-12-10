@@ -19,6 +19,7 @@ var days = []func(string) (int, int){
 	day6,
 	day7,
 	day8,
+	day9,
 }
 
 func main() {
@@ -58,6 +59,55 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day9(input string) (int, int) {
+	lines := strings.Split(input, "\r\n")
+	sequences := make([][][]int, len(lines))
+	for i, line := range lines {
+		nums := strings.Split(line, " ")
+		sequences[i] = make([][]int, 1, 8)
+		sequences[i][0] = make([]int, len(nums))
+		for j, num := range nums {
+			sequences[i][0][j] = quickconv(num)
+		}
+	}
+
+	all0s := func(sequence []int) bool {
+		for _, v := range sequence {
+			if v != 0 {
+				return false
+			}
+		}
+		return true
+	}
+
+	for i := range sequences {
+		previous := sequences[i][0]
+		for !all0s(previous) {
+			next := make([]int, len(previous)-1)
+			sequences[i] = append(sequences[i], next)
+			for j := range next {
+				next[j] = previous[j+1] - previous[j]
+			}
+			previous = next
+		}
+	}
+
+	predictNext := func(sequence [][]int) int {
+		diff := 0
+		for i := len(sequence) - 2; i >= 0; i-- {
+			diff = sequence[i][len(sequence[i])-1] + diff
+		}
+		return diff
+	}
+
+	sum1 := 0
+	for _, v := range sequences {
+		sum1 += predictNext(v)
+	}
+
+	return sum1, 0
 }
 
 func day8(input string) (int, int) {
