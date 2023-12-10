@@ -102,12 +102,22 @@ func day9(input string) (int, int) {
 		return diff
 	}
 
-	sum1 := 0
-	for _, v := range sequences {
-		sum1 += predictNext(v)
+	predictPrevious := func(sequence [][]int) int {
+		diff := 0
+		for i := len(sequence) - 2; i >= 0; i-- {
+			diff = sequence[i][0] - diff
+		}
+		return diff
 	}
 
-	return sum1, 0
+	sum1 := 0
+	sum2 := 0
+	for _, v := range sequences {
+		sum1 += predictNext(v)
+		sum2 += predictPrevious(v)
+	}
+
+	return sum1, sum2
 }
 
 func day8(input string) (int, int) {
