@@ -20,6 +20,7 @@ var days = []func(string) (int, int){
 	day7,
 	day8,
 	day9,
+	day10,
 }
 
 func main() {
@@ -59,6 +60,77 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day10(input string) (int, int) {
+	type vec2 struct {
+		x, y int
+	}
+
+	lines := strings.Split(input, "\r\n")
+	chars := make([][]rune, len(lines))
+	distances := make([][]int, len(lines))
+	startPos := vec2{}
+	for i := range lines {
+		chars[i] = []rune(lines[i])
+		distances[i] = make([]int, len(chars[i]))
+		if pos := strings.IndexRune(lines[i], 'S'); pos != -1 {
+			startPos.x = pos
+			startPos.y = i
+		}
+	}
+
+	move := func(pos vec2, dir vec2) (vec2, vec2, bool) {
+		if pos.x >= len(chars[0]) || pos.x < 0 || pos.y >= len(chars) || pos.y < 0 {
+			return vec2{}, vec2{}, false
+		} else if chars[pos.x][pos.y] == 'S' {
+			return pos, vec2{}, true
+		}
+		switch {
+		case dir.x == 1 && dir.y == 0:
+			switch chars[pos.x][pos.y] {
+			case 'J':
+				return vec2{pos.x, pos.y - 1}, vec2{0, -1}, true
+			case '7':
+				return vec2{pos.x, pos.y + 1}, vec2{0, 1}, true
+			case '-':
+				return vec2{pos.x + 1, pos.y}, vec2{1, 0}, true
+			}
+
+		case dir.x == -1 && dir.y == 0:
+			switch chars[pos.x][pos.y] {
+			case 'L':
+				return vec2{pos.x, pos.y - 1}, vec2{0, -1}, true
+			case 'F':
+				return vec2{pos.x, pos.y + 1}, vec2{0, 1}, true
+			case '-':
+				return vec2{pos.x - 1, pos.y}, vec2{-1, 0}, true
+			}
+
+		case dir.x == 0 && dir.y == 1:
+			switch chars[pos.x][pos.y] {
+			case 'L':
+				return vec2{pos.x + 1, pos.y}, vec2{1, 0}, true
+			case 'J':
+				return vec2{pos.x - 1, pos.y}, vec2{-1, 0}, true
+			case '|':
+				return vec2{pos.x, pos.y + 1}, vec2{0, 1}, true
+			}
+
+		case dir.x == 0 && dir.y == -1:
+			switch chars[pos.x][pos.y] {
+			case 'F':
+				return vec2{pos.x + 1, pos.y}, vec2{1, 0}, true
+			case '7':
+				return vec2{pos.x - 1, pos.y}, vec2{-1, 0}, true
+			case '|':
+				return vec2{pos.x, pos.y - 1}, vec2{0, -1}, true
+			}
+		}
+		return pos, vec2{}, false
+	}
+
+	return 0, 0
 }
 
 func day9(input string) (int, int) {
