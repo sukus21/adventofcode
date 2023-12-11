@@ -130,17 +130,25 @@ func day10(input string) (int, int) {
 		return pos, vec2{}, false
 	}
 
+	painted := make([]vec2, 0, 256)
 	sum1 := 0
 	for _, diff := range []vec2{{0, 1}, {0, -1}, {1, 0}, {-1, 0}} {
 		pos := vec2{startPos.x + diff.x, startPos.y + diff.y}
 		distance := 1
 		var ok bool
+		painted = painted[:0]
 		for {
 			var npos vec2
 			npos, diff, ok = move(pos, diff)
 			if !ok || chars[pos.y][pos.x] == 'S' {
+				if !ok {
+					for _, v := range painted {
+						distances[v.y][v.x] = 0
+					}
+				}
 				break
 			}
+			painted = append(painted, vec2{pos.x, pos.y})
 			if distances[pos.y][pos.x] == 0 || distance < distances[pos.y][pos.x] {
 				distances[pos.y][pos.x] = distance
 			} else if distances[pos.y][pos.x] >= distance {
@@ -151,7 +159,56 @@ func day10(input string) (int, int) {
 		}
 	}
 
-	return sum1, 0
+	checkstart := func(x, y int) bool {
+		x += startPos.x
+		y += startPos.y
+		if x > len(chars[0]) || x < 0 || y > len(chars) || y < 0 {
+			return false
+		}
+		return distances[y][x] != 0
+	}
+
+	distances[startPos.y][startPos.x] = -1
+	switch {
+	case checkstart(1, 0) && checkstart(-1, 0):
+		chars[startPos.y][startPos.x] = '-'
+	case checkstart(0, 1) && checkstart(0, -1):
+		chars[startPos.y][startPos.x] = '|'
+	case checkstart(1, 0) && checkstart(0, 1):
+		chars[startPos.y][startPos.x] = 'F'
+	case checkstart(-1, 0) && checkstart(0, 1):
+		chars[startPos.y][startPos.x] = '7'
+	case checkstart(1, 0) && checkstart(0, -1):
+		chars[startPos.y][startPos.x] = 'J'
+	case checkstart(-1, 0) && checkstart(0, -1):
+		chars[startPos.y][startPos.x] = 'L'
+	}
+
+	sum2 := 0
+	inside := false
+	switchOn := ' '
+	for i := range distances {
+		for j := range distances[i] {
+			char := chars[i][j]
+			distance := distances[i][j]
+			if distance != 0 {
+				if char == 'F' {
+					switchOn = 'J'
+				} else if char == 'L' {
+					switchOn = '7'
+				}
+				if char == '|' || char == 'J' || char == '7' {
+					if char == '|' || char == switchOn {
+						inside = !inside
+					}
+				}
+			} else if inside {
+				sum2++
+			}
+		}
+	}
+
+	return sum1, sum2
 }
 
 func day9(input string) (int, int) {
