@@ -21,6 +21,7 @@ var days = []func(string) (int, int){
 	day8,
 	day9,
 	day10,
+	day11,
 }
 
 func main() {
@@ -60,6 +61,56 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day11(input string) (int, int) {
+	type vec2 struct{ x, y int }
+	lines := strings.Split(input, "\r\n")
+	galaxies := make([]vec2, 0, 256)
+	spaceRow := make([]int, len(lines))
+	spaceCol := make([]int, len(lines))
+	for i := range spaceCol {
+		spaceCol[i] = 1
+	}
+	for i, line := range lines {
+		if !strings.ContainsRune(line, '#') {
+			spaceRow[i] = 1
+			continue
+		}
+		for j, char := range line {
+			if char == '#' {
+				galaxies = append(galaxies, vec2{j, i})
+				spaceCol[j] = 0
+			}
+		}
+	}
+
+	//Expand empty space
+	offsetX := make([]int, len(spaceRow))
+	offsetY := make([]int, len(spaceCol))
+	offsetTemp := 0
+	for i, v := range spaceRow {
+		offsetTemp += v
+		offsetY[i] = offsetTemp
+	}
+	offsetTemp = 0
+	for i, v := range spaceCol {
+		offsetTemp += v
+		offsetX[i] = offsetTemp
+	}
+
+	sum1 := 0
+	sum2 := 0
+	for i, v := range galaxies {
+		for j := i; j < len(galaxies); j++ {
+			g := galaxies[j]
+			distanceGalaxies := abs(v.x-g.x) + abs(v.y-g.y)
+			spaceExpansion := abs(offsetX[v.x]-offsetX[g.x]) + abs(offsetY[v.y]-offsetY[g.y])
+			sum1 += distanceGalaxies + spaceExpansion
+		}
+	}
+
+	return sum1, sum2
 }
 
 func day10(input string) (int, int) {
