@@ -83,12 +83,12 @@ func day10(input string) (int, int) {
 	move := func(pos vec2, dir vec2) (vec2, vec2, bool) {
 		if pos.x >= len(chars[0]) || pos.x < 0 || pos.y >= len(chars) || pos.y < 0 {
 			return vec2{}, vec2{}, false
-		} else if chars[pos.x][pos.y] == 'S' {
+		} else if chars[pos.y][pos.x] == 'S' {
 			return pos, vec2{}, true
 		}
 		switch {
 		case dir.x == 1 && dir.y == 0:
-			switch chars[pos.x][pos.y] {
+			switch chars[pos.y][pos.x] {
 			case 'J':
 				return vec2{pos.x, pos.y - 1}, vec2{0, -1}, true
 			case '7':
@@ -98,7 +98,7 @@ func day10(input string) (int, int) {
 			}
 
 		case dir.x == -1 && dir.y == 0:
-			switch chars[pos.x][pos.y] {
+			switch chars[pos.y][pos.x] {
 			case 'L':
 				return vec2{pos.x, pos.y - 1}, vec2{0, -1}, true
 			case 'F':
@@ -108,7 +108,7 @@ func day10(input string) (int, int) {
 			}
 
 		case dir.x == 0 && dir.y == 1:
-			switch chars[pos.x][pos.y] {
+			switch chars[pos.y][pos.x] {
 			case 'L':
 				return vec2{pos.x + 1, pos.y}, vec2{1, 0}, true
 			case 'J':
@@ -118,7 +118,7 @@ func day10(input string) (int, int) {
 			}
 
 		case dir.x == 0 && dir.y == -1:
-			switch chars[pos.x][pos.y] {
+			switch chars[pos.y][pos.x] {
 			case 'F':
 				return vec2{pos.x + 1, pos.y}, vec2{1, 0}, true
 			case '7':
@@ -130,7 +130,28 @@ func day10(input string) (int, int) {
 		return pos, vec2{}, false
 	}
 
-	return 0, 0
+	sum1 := 0
+	for _, diff := range []vec2{{0, 1}, {0, -1}, {1, 0}, {-1, 0}} {
+		pos := vec2{startPos.x + diff.x, startPos.y + diff.y}
+		distance := 1
+		var ok bool
+		for {
+			var npos vec2
+			npos, diff, ok = move(pos, diff)
+			if !ok || chars[pos.y][pos.x] == 'S' {
+				break
+			}
+			if distances[pos.y][pos.x] == 0 || distance < distances[pos.y][pos.x] {
+				distances[pos.y][pos.x] = distance
+			} else if distances[pos.y][pos.x] >= distance {
+				sum1 = ternary(sum1 > distance, sum1, distance)
+			}
+			pos = npos
+			distance++
+		}
+	}
+
+	return sum1, 0
 }
 
 func day9(input string) (int, int) {
