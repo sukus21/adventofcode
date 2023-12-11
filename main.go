@@ -107,6 +107,7 @@ func day11(input string) (int, int) {
 			distanceGalaxies := abs(v.x-g.x) + abs(v.y-g.y)
 			spaceExpansion := abs(offsetX[v.x]-offsetX[g.x]) + abs(offsetY[v.y]-offsetY[g.y])
 			sum1 += distanceGalaxies + spaceExpansion
+			sum2 += distanceGalaxies + spaceExpansion*999_999
 		}
 	}
 
