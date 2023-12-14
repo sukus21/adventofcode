@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"math/bits"
 	"os"
 	"slices"
 	"strconv"
@@ -22,6 +23,7 @@ var days = []func(string) (int, int){
 	day9,
 	day10,
 	day11,
+	day12,
 }
 
 func main() {
@@ -61,6 +63,115 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day12(input string) (int, int) {
+	type springline struct {
+		springs     []rune
+		brokenCount []int
+		missing     int
+		unknowns    int
+	}
+
+	lines := strings.Split(input, "\r\n")
+	springLines := make([]springline, len(lines))
+	for i, v := range lines {
+		spring := &springLines[i]
+		split1 := strings.Split(v, " ")
+		spring.springs = []rune(split1[0])
+
+		knownBroken := 0
+		for _, c := range spring.springs {
+			if c == '#' {
+				knownBroken++
+			} else if c == '?' {
+				spring.unknowns++
+			}
+		}
+
+		totalBroken := 0
+		brokenCounts := strings.Split(split1[1], ",")
+		spring.brokenCount = make([]int, len(brokenCounts))
+		for j, n := range brokenCounts {
+			num := quickconv(n)
+			spring.brokenCount[j] = num
+			totalBroken += num
+		}
+		spring.missing = totalBroken - knownBroken
+	}
+
+	valid := func(s *springline, attempt uint) bool {
+		currentBroken := 0
+		brokenRow := 0
+
+		validSequence := func() bool {
+			if currentBroken != 0 {
+				if brokenRow >= len(s.brokenCount) || s.brokenCount[brokenRow] != currentBroken {
+					return false
+				}
+				currentBroken = 0
+				brokenRow++
+			}
+			return true
+		}
+
+		for _, v := range s.springs {
+			if v == '?' {
+				broken := (attempt & 1) != 0
+				attempt >>= 1
+				if broken {
+					v = '#'
+				} else {
+					v = '.'
+				}
+			}
+			if v == '#' {
+				currentBroken++
+			} else if !validSequence() {
+				return false
+			}
+		}
+		return validSequence()
+	}
+
+	var moveBit func(s *springline, attempt, upperbits uint, mask uint, bit int) int
+	moveBit = func(s *springline, attempt, upperbits, mask uint, bit int) int {
+		numValid := ternary(valid(s, attempt|upperbits), 1, 0)
+		for bit > 0 {
+			attempt &= mask ^ (1 << bit)
+			bit++
+			attempt |= 1 << bit
+			if attempt&mask != attempt {
+				break
+			}
+
+			//Move other bits to the start
+			naked := ((1 << bit) - 1) & attempt
+			otherBits := bits.OnesCount(uint(naked))
+			numValid += moveBit(s, naked, upperbits|(1<<bit), (1<<bit)-1, otherBits-1)
+		}
+		return numValid
+	}
+
+	sum1 := 1
+	for _, line := range springLines {
+		attempt := uint(0)
+		for i := 0; i < line.missing; i++ {
+			attempt <<= 1
+			attempt |= 1
+		}
+		mask := uint(0)
+		for i := 0; i < line.unknowns; i++ {
+			mask <<= 1
+			mask |= 1
+		}
+		possibleCount := moveBit(&line, attempt, 0, mask, line.missing-1)
+		if possibleCount != 0 {
+			sum1 *= possibleCount
+		}
+	}
+
+	return sum1, 0
 }
 
 func day11(input string) (int, int) {
