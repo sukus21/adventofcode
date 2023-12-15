@@ -129,6 +129,11 @@ func day12(input string) (int, int) {
 		return validSequence()
 	}
 
+	debugPrint := func(unknowns int, attempt uint) string {
+		return fmt.Sprintf(fmt.Sprintf("%%0%db", unknowns), attempt)
+	}
+	_ = debugPrint
+
 	var moveBit func(s *springline, attempt, upperbits uint, mask uint, bit int) int
 	moveBit = func(s *springline, attempt, upperbits, mask uint, bit int) int {
 		numValid := ternary(valid(s, attempt|upperbits), 1, 0)
