@@ -24,6 +24,7 @@ var days = []func(string) (int, int){
 	day10,
 	day11,
 	day12,
+	day13,
 }
 
 func main() {
@@ -63,6 +64,64 @@ func main() {
 	fmt.Println("part 1:", part1)
 	fmt.Println("part 2:", part2)
 	fmt.Println("time taken:", end.UnixMicro()-start.UnixMicro(), "μs")
+}
+
+func day13(input string) (int, int) {
+	mirrorLines := strings.Split(input, "\r\n\r\n")
+	mirrors := make([][][]bool, len(mirrorLines))
+	rotated := make([][][]bool, len(mirrorLines))
+	for i, mline := range mirrorLines {
+		lines := strings.Split(mline, "\r\n")
+		mirror := make([][]bool, len(lines))
+		for j, line := range lines {
+			mirror[j] = make([]bool, len(line))
+			for k, char := range line {
+				mirror[j][k] = char == '#'
+			}
+		}
+		mirrors[i] = mirror
+		rotate := make([][]bool, len(mirror[0]))
+		for j := range rotate {
+			rotate[j] = make([]bool, len(mirror))
+			for k := range rotate[j] {
+				rotate[j][k] = mirror[k][j]
+			}
+		}
+		rotated[i] = rotate
+	}
+
+	getMirror := func(mirror [][]bool) int {
+		for i := range mirror {
+			if i == 0 {
+				continue
+			}
+			low := i - 1
+			high := i
+			fail := false
+			for low >= 0 && high < len(mirror) {
+				if !slices.Equal(mirror[low], mirror[high]) {
+					fail = true
+					break
+				}
+				low--
+				high++
+			}
+			if fail {
+				continue
+			}
+			return i
+		}
+
+		return 0
+	}
+
+	sum1 := 0
+	for i := range mirrors {
+		sum1 += getMirror(mirrors[i]) * 100
+		sum1 += getMirror(rotated[i])
+	}
+
+	return sum1, 0
 }
 
 func day12(input string) (int, int) {
