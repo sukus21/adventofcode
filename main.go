@@ -117,13 +117,8 @@ func day12(input string) (int, int) {
 
 		for _, v := range s.springs {
 			if v == '?' {
-				broken := (attempt & 1) != 0
+				v = ternary((attempt&1) != 0, '#', '.')
 				attempt >>= 1
-				if broken {
-					v = '#'
-				} else {
-					v = '.'
-				}
 			}
 			if v == '#' {
 				currentBroken++
@@ -137,7 +132,8 @@ func day12(input string) (int, int) {
 	var moveBit func(s *springline, attempt, upperbits uint, mask uint, bit int) int
 	moveBit = func(s *springline, attempt, upperbits, mask uint, bit int) int {
 		numValid := ternary(valid(s, attempt|upperbits), 1, 0)
-		for bit > 0 {
+
+		for bit >= 0 {
 			attempt &= mask ^ (1 << bit)
 			bit++
 			attempt |= 1 << bit
@@ -153,7 +149,7 @@ func day12(input string) (int, int) {
 		return numValid
 	}
 
-	sum1 := 1
+	sum1 := 0
 	for _, line := range springLines {
 		attempt := uint(0)
 		for i := 0; i < line.missing; i++ {
@@ -165,10 +161,7 @@ func day12(input string) (int, int) {
 			mask <<= 1
 			mask |= 1
 		}
-		possibleCount := moveBit(&line, attempt, 0, mask, line.missing-1)
-		if possibleCount != 0 {
-			sum1 *= possibleCount
-		}
+		sum1 += moveBit(&line, attempt, 0, mask, line.missing-1)
 	}
 
 	return sum1, 0
