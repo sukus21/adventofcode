@@ -117,12 +117,10 @@ func day13(input string) (int, int) {
 	}
 
 	sum1 := 0
+	sum2 := 0
 	for i := range mirrors {
 		sum1 += getMirror(mirrors[i], 0) * 100
 		sum1 += getMirror(rotated[i], 0)
-	}
-	sum2 := 0
-	for i := range mirrors {
 		sum2 += getMirror(mirrors[i], 1) * 100
 		sum2 += getMirror(rotated[i], 1)
 	}
