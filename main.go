@@ -68,29 +68,27 @@ func main() {
 
 func day13(input string) (int, int) {
 	mirrorLines := strings.Split(input, "\r\n\r\n")
-	mirrors := make([][][]bool, len(mirrorLines))
-	rotated := make([][][]bool, len(mirrorLines))
+	mirrors := make([][]uint, len(mirrorLines))
+	rotated := make([][]uint, len(mirrorLines))
 	for i, mline := range mirrorLines {
 		lines := strings.Split(mline, "\r\n")
-		mirror := make([][]bool, len(lines))
+		mirror := make([]uint, len(lines))
 		for j, line := range lines {
-			mirror[j] = make([]bool, len(line))
 			for k, char := range line {
-				mirror[j][k] = char == '#'
+				mirror[j] |= uint(ternary(char == '#', 1, 0)) << k
 			}
 		}
 		mirrors[i] = mirror
-		rotate := make([][]bool, len(mirror[0]))
+		rotate := make([]uint, len(lines[0]))
 		for j := range rotate {
-			rotate[j] = make([]bool, len(mirror))
-			for k := range rotate[j] {
-				rotate[j][k] = mirror[k][j]
+			for k := range lines {
+				rotate[j] |= ((mirror[k] >> j) & 1) << k
 			}
 		}
 		rotated[i] = rotate
 	}
 
-	getMirror := func(mirror [][]bool) int {
+	getMirror := func(mirror []uint) int {
 		for i := range mirror {
 			if i == 0 {
 				continue
@@ -99,7 +97,7 @@ func day13(input string) (int, int) {
 			high := i
 			fail := false
 			for low >= 0 && high < len(mirror) {
-				if !slices.Equal(mirror[low], mirror[high]) {
+				if mirror[low] != mirror[high] {
 					fail = true
 					break
 				}
