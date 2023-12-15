@@ -88,16 +88,18 @@ func day13(input string) (int, int) {
 		rotated[i] = rotate
 	}
 
-	getMirror := func(mirror []uint) int {
+	getMirror := func(mirror []uint, off int) int {
 		for i := range mirror {
 			if i == 0 {
 				continue
 			}
+			diff := 0
 			low := i - 1
 			high := i
 			fail := false
 			for low >= 0 && high < len(mirror) {
-				if mirror[low] != mirror[high] {
+				diff += bits.OnesCount(mirror[low] ^ mirror[high])
+				if diff > off {
 					fail = true
 					break
 				}
@@ -106,8 +108,9 @@ func day13(input string) (int, int) {
 			}
 			if fail {
 				continue
+			} else if diff == off {
+				return i
 			}
-			return i
 		}
 
 		return 0
@@ -115,11 +118,16 @@ func day13(input string) (int, int) {
 
 	sum1 := 0
 	for i := range mirrors {
-		sum1 += getMirror(mirrors[i]) * 100
-		sum1 += getMirror(rotated[i])
+		sum1 += getMirror(mirrors[i], 0) * 100
+		sum1 += getMirror(rotated[i], 0)
+	}
+	sum2 := 0
+	for i := range mirrors {
+		sum2 += getMirror(mirrors[i], 1) * 100
+		sum2 += getMirror(rotated[i], 1)
 	}
 
-	return sum1, 0
+	return sum1, sum2
 }
 
 func day12(input string) (int, int) {
