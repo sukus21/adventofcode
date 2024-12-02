@@ -9,6 +9,7 @@ import (
 
 var years = map[int][]func(string) (int, int){
 	2023: y2023,
+	2024: y2024,
 }
 
 func main() {
