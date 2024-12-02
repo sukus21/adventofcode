@@ -18,3 +18,14 @@ func ternary[T any](condition bool, truthy T, falsy T) T {
 func abs(x int) int {
 	return ternary(x < 0, -x, x)
 }
+
+func sign(x int) int {
+	switch {
+	case x > 0:
+		return 1
+	case x < 0:
+		return -1
+	default:
+		return 0
+	}
+}
