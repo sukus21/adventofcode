@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"slices"
 	"strings"
 )
@@ -8,6 +9,50 @@ import (
 var y2024 = []func(string) (int, int){
 	y2024day1,
 	y2024day2,
+	y2024day3,
+}
+
+func y2024day3(input string) (int, int) {
+	expDo := regexp.MustCompile(`do\(\)`)
+	expDont := regexp.MustCompile(`don't\(\)`)
+	expMul := regexp.MustCompile(`mul\(\d+,\d+\)`)
+	expNum := regexp.MustCompile(`\d+`)
+	sum1 := 0
+	for _, v := range expMul.FindAllString(input, -1) {
+		found := expNum.FindAllString(v, 2)
+		sum1 += quickconv(found[0]) * quickconv(found[1])
+	}
+
+	sum2 := 0
+	idx := 0
+	enabled := true
+	for {
+		if enabled {
+			mulIdx := expMul.FindStringIndex(input[idx:])
+			dontIdx := expDont.FindStringIndex(input[idx:])
+			if mulIdx == nil && dontIdx == nil {
+				break
+			}
+
+			if (mulIdx == nil) || (dontIdx != nil && dontIdx[0] < mulIdx[0]) {
+				enabled = false
+				idx += dontIdx[1]
+			} else {
+				found := expNum.FindAllString(input[idx+mulIdx[0]:idx+mulIdx[1]], 2)
+				sum2 += quickconv(found[0]) * quickconv(found[1])
+				idx += mulIdx[1]
+			}
+		} else {
+			doIdx := expDo.FindStringIndex(input[idx:])
+			if nil == doIdx {
+				break
+			}
+			enabled = true
+			idx += doIdx[1]
+		}
+	}
+
+	return sum1, sum2
 }
 
 func y2024day2(input string) (int, int) {
