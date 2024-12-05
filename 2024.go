@@ -11,6 +11,60 @@ var y2024 = []func(string) (int, int){
 	y2024day2,
 	y2024day3,
 	y2024day4,
+	y2024day5,
+}
+
+func y2024day5(input string) (sum1 int, sum2 int) {
+	sections := strings.Split(input, "\n\n")
+	dependencies := make(map[int][]int)
+	for _, v := range strings.Split(sections[0], "\n") {
+		rule := strings.Split(v, "|")
+		dependency := quickconv(rule[0])
+		depender := quickconv(rule[1])
+		if _, ok := dependencies[depender]; !ok {
+			dependencies[depender] = []int{}
+		}
+		dependencies[depender] = append(dependencies[depender], dependency)
+	}
+	updateLists := make([][]int, 0)
+	for _, v := range strings.Split(sections[1], "\n") {
+		list := make([]int, 0)
+		for _, v := range strings.Split(v, ",") {
+			list = append(list, quickconv(v))
+		}
+		slices.Reverse(list)
+		updateLists = append(updateLists, list)
+	}
+
+	getCorrectOrder := func(list []int) []int {
+	restart:
+		resolved := make([]int, 0, len(list))
+		for i, page := range list {
+			if dependencies, ok := dependencies[page]; ok {
+				for _, dependency := range dependencies {
+					if slices.Contains(resolved, dependency) {
+						list[i], list[i-1] = list[i-1], list[i]
+						goto restart
+					}
+				}
+			}
+			resolved = append(resolved, page)
+		}
+
+		return list
+	}
+
+	for _, list := range updateLists {
+		ordered := slices.Clone(list)
+		correctOrder := getCorrectOrder(ordered)
+		if slices.Equal(list, correctOrder) {
+			sum1 += correctOrder[len(list)/2]
+		} else {
+			sum2 += correctOrder[len(list)/2]
+		}
+	}
+
+	return
 }
 
 func y2024day4(input string) (sum1 int, sum2 int) {
