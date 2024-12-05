@@ -10,6 +10,62 @@ var y2024 = []func(string) (int, int){
 	y2024day1,
 	y2024day2,
 	y2024day3,
+	y2024day4,
+}
+
+func y2024day4(input string) (sum1 int, sum2 int) {
+	rawLines := strings.Split(input, "\n")
+	lines := make([][]rune, len(rawLines))
+	for i := range rawLines {
+		lines[i] = []rune(rawLines[i])
+	}
+
+	target := [...]rune{'X', 'M', 'A', 'S'}
+	directions := [...][2]int{
+		{0, 1},
+		{0, -1},
+		{1, 1},
+		{1, 0},
+		{1, -1},
+		{-1, 1},
+		{-1, 0},
+		{-1, -1},
+	}
+	for j := 0; j < len(lines); j++ {
+		for i := 0; i < len(lines[j]); i++ {
+		loopDay1:
+			for d := range directions {
+				for t := range target {
+					x := uint(i + directions[d][0]*t)
+					y := uint(j + directions[d][1]*t)
+					if x >= uint(len(lines[0])) || y >= uint(len(lines)) || lines[y][x] != target[t] {
+						continue loopDay1
+					}
+				}
+
+				sum1 += 1
+			}
+
+			if i != 0 && j != 0 && i != len(lines[j])-1 && j != len(lines)-1 && lines[j][i] == 'A' {
+				corners := [...]rune{
+					lines[j+1][i+1],
+					lines[j-1][i-1],
+					lines[j-1][i+1],
+					lines[j+1][i-1],
+				}
+				if (corners[0] == 'M' || corners[0] == 'S') &&
+					(corners[1] == 'M' || corners[1] == 'S') &&
+					corners[0] != corners[1] &&
+					(corners[2] == 'M' || corners[2] == 'S') &&
+					(corners[3] == 'M' || corners[3] == 'S') &&
+					corners[2] != corners[3] {
+					sum2 += 1
+				}
+			}
+		}
+	}
+
+	return
 }
 
 func y2024day3(input string) (int, int) {
